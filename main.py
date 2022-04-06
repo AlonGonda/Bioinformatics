@@ -6,7 +6,7 @@
 
 # Press the green button in the gutter to run the script.
 def main():
-    print("Hey yagel welcome!")
+    print("Hey Yagel welcome!")
 
 
 if __name__ == '__main__':
