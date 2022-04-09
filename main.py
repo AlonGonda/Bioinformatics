@@ -1,6 +1,7 @@
 import os
 
-from functions import a_b_distance, calculateDistanceMatrix, read_ca_coordinates, a_b_distance_with_grad
+from functions import a_b_distance, calculateDistanceMatrix, read_ca_coordinates, a_b_distance_with_grad, load_pt_file, \
+    generate_ramachan
 
 
 def main():
@@ -8,6 +9,9 @@ def main():
     print(a_b_distance(10, 5))
     # print("Example of a_b_dm")
     # print(a_b_dm(10, 5))
+    load_pt_file(os.getcwd() + "\\refinementSampleData\\CoordCaNative.pt")
+    generate_ramachan()
+
     distanceMatrix = calculateDistanceMatrix(
         os.getcwd() + "/refinementSampleData")  # Calculated Matrix Distances for a certain protein
     print("Example of loading protein Coordinates")
