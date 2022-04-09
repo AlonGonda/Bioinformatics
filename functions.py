@@ -37,8 +37,8 @@ def PDB_parser(protein):
 
 
 # create ramachan plot
-def generate_ramachan():
-    pdb_file = "C:/Users/user/Desktop/third year/Bioinformatics/myfile.pdb"
+def generate_ramachan(path):
+    pdb_file = path + "\\myfile.pdb"
     RamachanDraw.plot(pdb_file, cmap='viridis', alpha=0.75, dpi=100, save=True, show=False, out='plot.png')
 
 

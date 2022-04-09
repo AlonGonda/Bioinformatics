@@ -10,7 +10,7 @@ def main():
     # print("Example of a_b_dm")
     # print(a_b_dm(10, 5))
     load_pt_file(os.getcwd() + "\\refinementSampleData\\CoordCaNative.pt")
-    generate_ramachan()
+    generate_ramachan(os.getcwd())
 
     distanceMatrix = calculateDistanceMatrix(
         os.getcwd() + "/refinementSampleData")  # Calculated Matrix Distances for a certain protein
