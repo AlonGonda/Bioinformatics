@@ -10,6 +10,7 @@ def load_pt_file(path):
     protein = model[126]
     PDB_parser(protein)
 
+
 # parse list of atom to the format of pdb file to ramachan diagram
 def PDB_parser(protein):
     f1 = open("myfile.pdb", "w")
@@ -120,3 +121,26 @@ def a_b_distance_with_grad(a, b):
     out = ((a - b) ** 2).sqrt()
     out.backward()
     return out.item(), a.grad, b.grad
+
+
+def torsionAngle(V1, V2, V3, V4):
+    # V in 3xN
+    A = V2 - V1
+    B = V3 - V2
+    C = V4 - V3
+
+    Bsq = torch.relu(torch.sum(B * B, dim=0, keepdim=True))
+    AC = torch.sum(A * C, dim=0, keepdim=True)
+    AB = torch.sum(A * B, dim=0, keepdim=True)
+    BC = torch.sum(B * C, dim=0, keepdim=True)
+    x = -torch.sum(Bsq * AC, dim=0, keepdim=True) + torch.sum(AB * BC, dim=0, keepdim=True)
+
+    absB = torch.sqrt(Bsq).sum(dim=0, keepdim=True)
+    BxC = torch.cross(B, C)
+    y = torch.sum((absB * A) * BxC, dim=0, keepdim=True)
+
+    cosTheta = x / torch.sqrt(x ** 2 + y ** 2 + 1e-3)
+    sinTheta = y / torch.sqrt(x ** 2 + y ** 2 + 1e-3)
+    theta = torch.arccos(cosTheta)
+    theta = theta * torch.sign(y)
+    return 180 * theta / torch.pi, cosTheta, sinTheta
