@@ -76,7 +76,14 @@ def calculateDistanceMatrix(path):
                 torch.pairwise_distance(aminoAcidI, aminoAcidJ))  # calculating the distance between two amino acids 3D.
         # print(current) # prints the distance matrix
         distances.append(current)
-    return distances
+
+    distanceMatrixInt = []
+    for i in distances:
+        new_line = []
+        for j in i:
+            new_line.append(j.item())
+        distanceMatrixInt.append(new_line)
+    print(plt.matshow(distanceMatrixInt))
 
 
 # Read coordinates of C-alpha

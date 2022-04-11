@@ -12,8 +12,11 @@ def main():
     load_pt_file(os.getcwd() + "\\refinementSampleData\\CoordCaNative.pt")
     generate_ramachan(os.getcwd())
 
-    distanceMatrix = calculateDistanceMatrix(
+    calculateDistanceMatrix(
         os.getcwd() + "/refinementSampleData")  # Calculated Matrix Distances for a certain protein
+
+
+
     print("Example of loading protein Coordinates")
     read_ca_coordinates(os.getcwd() + "/refinementSampleData")
     print("Back to a_b_distance this time with gradient")
