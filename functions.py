@@ -1,46 +1,16 @@
+import os
+
 import RamachanDraw
+import matplotlib
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
 
 
-# import PyPDB
-def load_pt_file(path):
-    model = torch.load(path)
-    protein = model[126]
-    PDB_parser(protein)
-
-
-# parse list of atom to the format of pdb file to ramachan diagram
-def PDB_parser(protein):
-    f1 = open("myfile.pdb", "w")
-    i = 0
-    for atom in protein:
-        atom = atom.numpy()
-        j1 = "ATOM".ljust(6)  # atom#6s
-        index = str(++i)
-        j2 = index.rjust(5)  # aomnum#5d
-        j3 = "C".center(4)  # atomname$#4s
-        j4 = "PRO".ljust(3)  # resname#1s
-        j5 = "A".rjust(1)  # Astring
-        j6 = index.rjust(4)  # resnum
-        j7 = str('%8.3f' % (float(atom[0]))).rjust(8)  # x
-        j8 = str('%8.3f' % (float(atom[1]))).rjust(8)  # y
-        j9 = str('%8.3f' % (float(atom[2]))).rjust(8)  # z
-        j10 = str('%6.2f' % (1)).rjust(6)  # occ
-        j11 = str('%6.2f' % (60)).ljust(6)  # temp
-        j12 = "C".rjust(12)  # elname
-
-        text = "{first}{second} {third} {fourth} {fifth}{sixth}    {seventh}{eighth}{ninth}{tenth}{eleventh}{twelvth}\n".format(
-            first=j1, second=j2, third=j3, fourth=j4, fifth=j5, sixth=j6, seventh=j7, eighth=j8, ninth=j9, tenth=j10,
-            eleventh=j11, twelvth=j12)
-        f1.write(text)
-
-
-# create ramachan plot
-def generate_ramachan(path):
-    pdb_file = path + "\\myfile.pdb"
-    RamachanDraw.plot(pdb_file, cmap='viridis', alpha=0.75, dpi=100, save=True, show=False, out='plot.png')
+def part1():
+    ramachandran(os.getcwd() + "\\refinementSampleData", 126)
+    calculateDistanceAndContactMatrix(
+        os.getcwd() + "\\refinementSampleData", 126)  # Calculated Matrix Distances for a certain protein
 
 
 # Simple distance
@@ -65,10 +35,10 @@ def a_b_dm(a, b):
     return dm
 
 
-def calculateDistanceMatrix(path):
+def calculateDistanceAndContactMatrix(path, index):
     # We chose protien No.126
     ca_coordinates = torch.load(path + "/CoordCaNative.pt")
-    first = ca_coordinates[126]
+    first = ca_coordinates[index]
     distances = []
     for aminoAcidI in first:
         current = []
@@ -84,7 +54,25 @@ def calculateDistanceMatrix(path):
         for j in i:
             new_line.append(j.item())
         distanceMatrixInt.append(new_line)
-    print(plt.matshow(distanceMatrixInt))
+    plt.matshow(distanceMatrixInt)
+
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    ax.set_title("Contact Map")
+
+    contact_map = []
+    for i in distances:
+        new_line = []
+        for j in i:
+            toEnter = j.item() / 100
+            if toEnter > 10:
+                new_line.append(0)
+            else:
+                new_line.append(toEnter)
+        contact_map.append(new_line)
+
+    axc = ax.imshow(contact_map, cmap=matplotlib.cm.get_cmap("viridis"), interpolation="antialiased", origin="upper")
+    plt.show()
 
 
 # Read coordinates of C-alpha
@@ -144,3 +132,37 @@ def torsionAngle(V1, V2, V3, V4):
     theta = torch.arccos(cosTheta)
     theta = theta * torch.sign(y)
     return 180 * theta / torch.pi, cosTheta, sinTheta
+
+
+def ramachandran(path, index):
+    n_coordinates = torch.load(path + "\\CoordNNative.pt")
+    ca_coordinates = torch.load(path + "\\CoordCaNative.pt")
+    c_coordinates = torch.load(path + "\\CoordCNative.pt")
+
+    n_coordinates_i = n_coordinates[index]
+    ca_coordinates_i = ca_coordinates[index]
+    c_coordinates_i = c_coordinates[index]
+    mask_i = n_coordinates_i[:, 0] < 9999
+
+    n_coordinates_i = n_coordinates_i[mask_i, :] / 100
+    ca_coordinates_i = ca_coordinates_i[mask_i, :] / 100
+    c_coordinates_i = c_coordinates_i[mask_i, :] / 100
+
+    c0_phi = c_coordinates_i[0:-1, :]
+    n_phi = n_coordinates_i[1:, :]
+    ca_phi = ca_coordinates_i[1:, :]
+    c_phi = c_coordinates_i[1:, :]
+    phi, cosPhi, sinPhi = torsionAngle(c0_phi.t(), n_phi.t(), ca_phi.t(), c_phi.t())
+    n_psi = n_coordinates_i[0:-1, :]
+    ca_psi = ca_coordinates_i[0:-1, :]
+    c_psi = c_coordinates_i[0:-1, :]
+    n1_psi = n_coordinates_i[1:, :]
+    psi, cosPsi, sinPsi = torsionAngle(n_psi.t(), ca_psi.t(), c_psi.t(), n1_psi.t())
+
+    fig, (axr) = plt.subplots(ncols=1, figsize=(4.2, 4.2))
+    axr.set_title('Ramachandran map')
+
+    plt.scatter(phi, psi)
+    axr.axvline(c='grey', lw=1.5)
+    axr.axhline(c='grey', lw=1.5)
+    axr.set_aspect('equal', 'box')
