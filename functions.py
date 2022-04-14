@@ -1,6 +1,4 @@
 import os
-
-import RamachanDraw
 import matplotlib
 import torch
 import matplotlib.pyplot as plt
@@ -8,9 +6,9 @@ import numpy as np
 
 
 def part1():
-    ramachandran(os.getcwd() + "\\refinementSampleData", 126)
+    ramachandran(os.getcwd() + "\\refinementSampleData", 0)
     calculateDistanceAndContactMatrix(
-        os.getcwd() + "\\refinementSampleData", 126)  # Calculated Matrix Distances for a certain protein
+        os.getcwd() + "\\refinementSampleData", 0)  # Calculated Matrix Distances for a certain protein
 
 
 # Simple distance
@@ -44,17 +42,11 @@ def calculateDistanceAndContactMatrix(path, index):
         current = []
         for aminoAcidJ in first:
             current.append(
-                torch.pairwise_distance(aminoAcidI, aminoAcidJ))  # calculating the distance between two amino acids 3D.
-        # print(current) # prints the distance matrix
+                torch.pairwise_distance(aminoAcidI,
+                                        aminoAcidJ).numpy())  # calculating the distance between two amino acids 3D.
         distances.append(current)
 
-    distanceMatrixInt = []
-    for i in distances:
-        new_line = []
-        for j in i:
-            new_line.append(j.item())
-        distanceMatrixInt.append(new_line)
-    plt.matshow(distanceMatrixInt)
+    plt.matshow(distances)
 
     fig = plt.figure()
     ax = fig.add_subplot()
@@ -68,7 +60,7 @@ def calculateDistanceAndContactMatrix(path, index):
             if toEnter > 10:
                 new_line.append(0)
             else:
-                new_line.append(toEnter)
+                new_line.append(1)
         contact_map.append(new_line)
 
     axc = ax.imshow(contact_map, cmap=matplotlib.cm.get_cmap("viridis"), interpolation="antialiased", origin="upper")
