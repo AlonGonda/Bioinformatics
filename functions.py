@@ -6,9 +6,9 @@ import numpy as np
 
 
 def part1():
-    ramachandran(os.getcwd() + "\\refinementSampleData", 0)
+    ramachandran(os.getcwd() + "\\refinementSampleData", 126)
     calculateDistanceAndContactMatrix(
-        os.getcwd() + "\\refinementSampleData", 0)  # Calculated Matrix Distances for a certain protein
+        os.getcwd() + "\\refinementSampleData", 126)  # Calculated Matrix Distances for a certain protein
 
 
 # Simple distance
@@ -33,37 +33,45 @@ def a_b_dm(a, b):
     return dm
 
 
+def get_id(path, index):
+    ids = torch.load(path + "/ids.pt")
+    id = ids[index][0:8]
+    return id
+
+
 def calculateDistanceAndContactMatrix(path, index):
     # We chose protien No.126
+    id = get_id(path, index)
     ca_coordinates = torch.load(path + "/CoordCaNative.pt")
-    first = ca_coordinates[index]
-    distances = []
-    for aminoAcidI in first:
-        current = []
-        for aminoAcidJ in first:
-            current.append(
-                torch.pairwise_distance(aminoAcidI,
-                                        aminoAcidJ).numpy())  # calculating the distance between two amino acids 3D.
-        distances.append(current)
+    pro = ca_coordinates[index]
 
-    plt.matshow(distances)
+    pp = pro @ pro.t()
+    pp2 = pp * 2
+    p_squared = (pro ** 2).sum(dim=1, keepdim=True)
+    ps_pst = p_squared + p_squared.t()
+    dm = (ps_pst - pp2).sqrt().numpy()
 
-    fig = plt.figure()
-    ax = fig.add_subplot()
-    ax.set_title("Contact Map")
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(10, 10))
+    fig.suptitle('Protein ' + id)
 
-    contact_map = []
-    for i in distances:
-        new_line = []
-        for j in i:
-            toEnter = j.item() / 100
-            if toEnter > 10:
-                new_line.append(0)
-            else:
-                new_line.append(1)
-        contact_map.append(new_line)
+    ax2.set_title("Contact Map")
 
-    axc = ax.imshow(contact_map, cmap=matplotlib.cm.get_cmap("viridis"), interpolation="antialiased", origin="upper")
+    contact_map = dm[:] / 100
+    contact_map = contact_map[:] <= 10
+
+    ax2.imshow(contact_map, cmap=matplotlib.cm.get_cmap("viridis"), interpolation="antialiased", origin="upper")
+    dm[dm >= 999] = -1
+
+    ax1.set_title("Distance Map")
+    ax1.imshow(dm, cmap=matplotlib.cm.get_cmap("viridis"), interpolation="antialiased", origin="upper")
+
+    ram = ramachandran(path, index)
+
+    ax3.set_title("Ramachandran Map")
+    ax3.scatter(ram[0], ram[1])
+    ax3.axvline(c='grey', lw=1.5)
+    ax3.axhline(c='grey', lw=1.5)
+    ax3.set_aspect('equal', 'box')
     plt.show()
 
 
@@ -150,11 +158,4 @@ def ramachandran(path, index):
     c_psi = c_coordinates_i[0:-1, :]
     n1_psi = n_coordinates_i[1:, :]
     psi, cosPsi, sinPsi = torsionAngle(n_psi.t(), ca_psi.t(), c_psi.t(), n1_psi.t())
-
-    fig, (axr) = plt.subplots(ncols=1, figsize=(4.2, 4.2))
-    axr.set_title('Ramachandran map')
-
-    plt.scatter(phi, psi)
-    axr.axvline(c='grey', lw=1.5)
-    axr.axhline(c='grey', lw=1.5)
-    axr.set_aspect('equal', 'box')
+    return phi, psi
