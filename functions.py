@@ -52,7 +52,7 @@ def calculateDistanceAndContactMatrix(path, index):
     dm = (ps_pst - pp2).sqrt().numpy()
 
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(10, 10))
-    fig.suptitle('Protein ' + id)
+    fig.suptitle(id)
 
     ax2.set_title("Contact Map")
 
@@ -67,7 +67,7 @@ def calculateDistanceAndContactMatrix(path, index):
 
     ram = ramachandran(path, index)
 
-    ax3.set_title("Ramachandran Map")
+    ax3.set_title("Ramachandran")
     ax3.scatter(ram[0], ram[1])
     ax3.axvline(c='grey', lw=1.5)
     ax3.axhline(c='grey', lw=1.5)
