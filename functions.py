@@ -6,9 +6,9 @@ import numpy as np
 
 
 def part1():
-    ramachandran(os.getcwd() + "\\refinementSampleData", 126)
+    ramachandran(os.getcwd() + "\\refinementSampleData", 5)
     calculateDistanceAndContactMatrix(
-        os.getcwd() + "\\refinementSampleData", 126)  # Calculated Matrix Distances for a certain protein
+        os.getcwd() + "\\refinementSampleData", 5)  # Calculated Matrix Distances for a certain protein
 
 
 # Simple distance
@@ -35,8 +35,17 @@ def a_b_dm(a, b):
 
 def get_id(path, index):
     ids = torch.load(path + "/ids.pt")
-    id = ids[index][0:8]
+    id = ids[index][0:8]  # cutting string.
     return id
+
+
+def vector_dm(v):
+    vv = v @ v.t()
+    vv2 = 2 * vv
+    vv_diagonal = vv.diag().unsqueeze(0)
+    vv_diagonal2 = vv_diagonal + vv_diagonal.t()
+    dm = (vv_diagonal2 - vv2).sqrt()
+    return dm
 
 
 def calculateDistanceAndContactMatrix(path, index):
@@ -44,26 +53,32 @@ def calculateDistanceAndContactMatrix(path, index):
     id = get_id(path, index)
     ca_coordinates = torch.load(path + "/CoordCaNative.pt")
     pro = ca_coordinates[index]
-
-    pp = pro @ pro.t()
-    pp2 = pp * 2
-    p_squared = (pro ** 2).sum(dim=1, keepdim=True)
-    ps_pst = p_squared + p_squared.t()
-    dm = (ps_pst - pp2).sqrt().numpy()
+    ##
+    Xpro = pro[:, 0]  # filtering only x cooardinates .
+    XproFiltered = Xpro < 99999  # tensor of TRUE AND FALSE. TRUE WHERE coordinate is smaller than 99999 and false otherwise.
+    sizepro = pro.shape[0]
+    onezero_vector = torch.zeros(sizepro,
+                                 1)  # creating a one(true) zero(false) vector accordingly. initialize it with zeros.
+    onezero_vector[XproFiltered] = 1
+    distance_map = onezero_vector @ onezero_vector.t()  # creating a matrix tenor instead of a vector.
+    distance_map_ignoring_999 = vector_dm(pro)
+    onezero_matrixFiltered = distance_map == 1
+    # in every spot where there was 1 in the distance map , we replace it with the actual value stored in distance map ignoring 999.
+    distance_map[onezero_matrixFiltered] = distance_map_ignoring_999[onezero_matrixFiltered]
+    ##
 
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(10, 10))
     fig.suptitle(id)
 
     ax2.set_title("Contact Map")
 
-    contact_map = dm[:] / 100
+    contact_map = distance_map[:] / 100
     contact_map = contact_map[:] <= 10
 
     ax2.imshow(contact_map, cmap=matplotlib.cm.get_cmap("viridis"), interpolation="antialiased", origin="upper")
-    dm[dm >= 999] = -1
 
     ax1.set_title("Distance Map")
-    ax1.imshow(dm, cmap=matplotlib.cm.get_cmap("viridis"), interpolation="antialiased", origin="upper")
+    ax1.imshow(distance_map, cmap=matplotlib.cm.get_cmap("viridis"), interpolation="antialiased", origin="upper")
 
     ram = ramachandran(path, index)
 
