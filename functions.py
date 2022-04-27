@@ -84,8 +84,10 @@ def calculateDistanceAndContactMatrix(path, index):
 
     ax3.set_title("Ramachandran")
     ax3.scatter(ram[0], ram[1])
-    ax3.axvline(c='grey', lw=1.5)
-    ax3.axhline(c='grey', lw=1.5)
+    ax3.axvline(x=0, c='grey', lw=1.5)
+    ax3.axhline(y=0, c='grey', lw=1.5)
+    ax3.set_xlim(-180, 180)
+    ax3.set_ylim(-180, 180)
     ax3.set_aspect('equal', 'box')
     plt.show()
 
