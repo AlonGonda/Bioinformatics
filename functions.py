@@ -6,9 +6,9 @@ import numpy as np
 
 
 def part1():
-    ramachandran(os.getcwd() + "\\refinementSampleData", 5)
+    ramachandran(os.getcwd() + "\\refinementSampleData", 11)
     calculateDistanceAndContactMatrix(
-        os.getcwd() + "\\refinementSampleData", 5)  # Calculated Matrix Distances for a certain protein
+        os.getcwd() + "\\refinementSampleData", 11)  # Calculated Matrix Distances for a certain protein
 
 
 # Simple distance
@@ -66,28 +66,21 @@ def calculateDistanceAndContactMatrix(path, index):
     # in every spot where there was 1 in the distance map , we replace it with the actual value stored in distance map ignoring 999.
     distance_map[onezero_matrixFiltered] = distance_map_ignoring_999[onezero_matrixFiltered]
     ##
-
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(10, 10))
     fig.suptitle(id)
-
     ax2.set_title("Contact Map")
-
     contact_map = distance_map[:] / 100
     contact_map = contact_map[:] <= 10
-
     ax2.imshow(contact_map, cmap=matplotlib.cm.get_cmap("viridis"), interpolation="antialiased", origin="upper")
-
     ax1.set_title("Distance Map")
     ax1.imshow(distance_map, cmap=matplotlib.cm.get_cmap("viridis"), interpolation="antialiased", origin="upper")
-
     ram = ramachandran(path, index)
-
     ax3.set_title("Ramachandran")
+    ax3.set_xlim([-180, 180])
+    ax3.set_ylim([-180, 180])
     ax3.scatter(ram[0], ram[1])
-    ax3.axvline(x=0, c='grey', lw=1.5)
-    ax3.axhline(y=0, c='grey', lw=1.5)
-    ax3.set_xlim(-180, 180)
-    ax3.set_ylim(-180, 180)
+    ax3.axvline(c='grey', lw=1.5)
+    ax3.axhline(c='grey', lw=1.5)
     ax3.set_aspect('equal', 'box')
     plt.show()
 
@@ -103,7 +96,6 @@ def read_ca_coordinates(path):
     #  153
     #  Lets look at the first element of the list
     first = ca_coordinates[126]
-
     #  What is it?
     print(type(first))
     #  <class 'torch.Tensor'>
@@ -133,17 +125,14 @@ def torsionAngle(V1, V2, V3, V4):
     A = V2 - V1
     B = V3 - V2
     C = V4 - V3
-
     Bsq = torch.relu(torch.sum(B * B, dim=0, keepdim=True))
     AC = torch.sum(A * C, dim=0, keepdim=True)
     AB = torch.sum(A * B, dim=0, keepdim=True)
     BC = torch.sum(B * C, dim=0, keepdim=True)
     x = -torch.sum(Bsq * AC, dim=0, keepdim=True) + torch.sum(AB * BC, dim=0, keepdim=True)
-
     absB = torch.sqrt(Bsq).sum(dim=0, keepdim=True)
     BxC = torch.cross(B, C)
     y = torch.sum((absB * A) * BxC, dim=0, keepdim=True)
-
     cosTheta = x / torch.sqrt(x ** 2 + y ** 2 + 1e-3)
     sinTheta = y / torch.sqrt(x ** 2 + y ** 2 + 1e-3)
     theta = torch.arccos(cosTheta)
@@ -155,24 +144,41 @@ def ramachandran(path, index):
     n_coordinates = torch.load(path + "\\CoordNNative.pt")
     ca_coordinates = torch.load(path + "\\CoordCaNative.pt")
     c_coordinates = torch.load(path + "\\CoordCNative.pt")
-
     n_coordinates_i = n_coordinates[index]
     ca_coordinates_i = ca_coordinates[index]
     c_coordinates_i = c_coordinates[index]
-    mask_i = n_coordinates_i[:, 0] < 9999
-
-    n_coordinates_i = n_coordinates_i[mask_i, :] / 100
-    ca_coordinates_i = ca_coordinates_i[mask_i, :] / 100
-    c_coordinates_i = c_coordinates_i[mask_i, :] / 100
-
-    c0_phi = c_coordinates_i[0:-1, :]
-    n_phi = n_coordinates_i[1:, :]
-    ca_phi = ca_coordinates_i[1:, :]
-    c_phi = c_coordinates_i[1:, :]
+    mask_i = ca_coordinates_i[:, 0] < 9999
+    mask_i = mask_i[1:-1]  # excluding the first and the last.
+    n_coordinates_i = n_coordinates_i[:] / 100
+    ca_coordinates_i = ca_coordinates_i[:] / 100
+    c_coordinates_i = c_coordinates_i[:] / 100
+    c0_phi = c_coordinates_i[0:-2, :]  # from 0 to n-2 included.
+    # excluding the first and the last . only for n-2 amino acids in the middle.
+    n_phi = n_coordinates_i[1:-1, :]
+    ca_phi = ca_coordinates_i[1:-1, :]
+    c_phi = c_coordinates_i[1:-1, :]
     phi, cosPhi, sinPhi = torsionAngle(c0_phi.t(), n_phi.t(), ca_phi.t(), c_phi.t())
-    n_psi = n_coordinates_i[0:-1, :]
-    ca_psi = ca_coordinates_i[0:-1, :]
-    c_psi = c_coordinates_i[0:-1, :]
-    n1_psi = n_coordinates_i[1:, :]
+    n_psi = n_coordinates_i[1:-1, :]
+    ca_psi = ca_coordinates_i[1:-1, :]
+    c_psi = c_coordinates_i[1:-1, :]
+    n1_psi = n_coordinates_i[2:, :]  # last n-2 amino acids.
     psi, cosPsi, sinPsi = torsionAngle(n_psi.t(), ca_psi.t(), c_psi.t(), n1_psi.t())
+    # creating a new correct mask according to the invalid places. initialize it with true.
+    mask_size = len(mask_i)
+    mask_i_fixed = [True] * (mask_size)
+    counter = 0
+    for element in mask_i:
+        # neighbor of invalid place -> angle is invalid. cases: "right and left"
+        if not element and counter > 0:
+            mask_i_fixed[counter - 1] = False
+            mask_i_fixed[counter] = False
+        if not element and counter < len(mask_i) - 1:
+            mask_i_fixed[counter + 1] = False
+            mask_i_fixed[counter] = False
+        counter = counter + 1
+    phi = phi[0]
+    psi = psi[0]
+    # filtering phi and psi.
+    phi = phi[mask_i_fixed]
+    psi = psi[mask_i_fixed]
     return phi, psi
