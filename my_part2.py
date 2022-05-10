@@ -43,8 +43,10 @@ def calculate_ramachandran_maps():
     sequences = torch.load(os.getcwd() + "\\refinementSampleData\\sequences.pt")
 
     dict_amino_acids_global = get_amino_acid_indexes(sequences)
-    dict_phi_angels = {'A': torch.tensor([], dtype=torch.float32), 'W': torch.tensor([], dtype=torch.float32), 'G': torch.tensor([], dtype=torch.float32), 'P': torch.tensor([], dtype=torch.float32)}
-    dict_psi_angels = {'A': torch.tensor([], dtype=torch.float32), 'W': torch.tensor([], dtype=torch.float32), 'G': torch.tensor([], dtype=torch.float32), 'P': torch.tensor([], dtype=torch.float32)}
+    dict_phi_angels = {'A': torch.tensor([], dtype=torch.float32), 'W': torch.tensor([], dtype=torch.float32),
+                       'G': torch.tensor([], dtype=torch.float32), 'P': torch.tensor([], dtype=torch.float32)}
+    dict_psi_angels = {'A': torch.tensor([], dtype=torch.float32), 'W': torch.tensor([], dtype=torch.float32),
+                       'G': torch.tensor([], dtype=torch.float32), 'P': torch.tensor([], dtype=torch.float32)}
     for index in range(0, len(sequences)):
         n_coordinates_A = torch.index_select(torch.FloatTensor(n_coordinates[index]), 0,
                                              dict_amino_acids_global['A'][index].to(torch.int64))
@@ -86,33 +88,41 @@ def calculate_ramachandran_maps():
         dict_psi_angels['W'] = torch.cat((dict_psi_angels['W'], psiW), 1)
         dict_psi_angels['G'] = torch.cat((dict_psi_angels['G'], psiG), 1)
 
-    fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(10, 10))
+    fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+    axs[0, 0].set_title(part2_utils.typesData().types_data['A'].name)
+    axs[0, 0].set_xlim([-180, 180])
+    axs[0, 0].set_ylim([-180, 180])
+    axs[0, 0].set_ylabel(u'\u03A8')
+    axs[0, 0].set_xlabel(u'\u03A6')
+    axs[0, 0].scatter(dict_phi_angels['A'].tolist(), dict_psi_angels['A'].tolist())
+    axs[0, 0].set_aspect('equal', 'box')
 
-    ax1.set_title(part2_utils.typesData().types_data['A'].name)
-    ax1.set_xlim([-180, 180])
-    ax1.set_ylim([-180, 180])
-    ax1.scatter(dict_phi_angels['A'].tolist(), dict_psi_angels['A'].tolist())
-    ax1.set_aspect('equal', 'box')
+    axs[1, 1].set_title(part2_utils.typesData().types_data['P'].name)
+    axs[1, 1].set_xlim([-180, 180])
+    axs[1, 1].set_ylim([-180, 180])
+    axs[1, 1].set_ylabel(u'\u03A8')
+    axs[1, 1].set_xlabel(u'\u03A6')
+    axs[1, 1].scatter(dict_phi_angels['P'].tolist(), dict_psi_angels['P'].tolist())
+    axs[1, 1].set_aspect('equal', 'box')
 
-    ax2.set_title(part2_utils.typesData().types_data['P'].name)
-    ax2.set_xlim([-180, 180])
-    ax2.set_ylim([-180, 180])
-    ax2.scatter(dict_phi_angels['P'].tolist(), dict_psi_angels['P'].tolist())
-    ax2.set_aspect('equal', 'box')
+    axs[0, 1].set_title(part2_utils.typesData().types_data['W'].name)
+    axs[0, 1].set_xlim([-180, 180])
+    axs[0, 1].set_ylim([-180, 180])
+    axs[0, 1].set_ylabel(u'\u03A8')
+    axs[0, 1].set_xlabel(u'\u03A6')
+    axs[0, 1].scatter(dict_phi_angels['W'].tolist(), dict_psi_angels['W'].tolist())
+    axs[0, 1].set_aspect('equal', 'box')
 
-    ax3.set_title(part2_utils.typesData().types_data['W'].name)
-    ax3.set_xlim([-180, 180])
-    ax3.set_ylim([-180, 180])
-    ax3.scatter(dict_phi_angels['W'].tolist(), dict_psi_angels['W'].tolist())
-    ax3.set_aspect('equal', 'box')
-
-    ax4.set_title(part2_utils.typesData().types_data['G'].name)
-    ax4.set_xlim([-180, 180])
-    ax4.set_ylim([-180, 180])
-    ax4.scatter(dict_phi_angels['G'].tolist(), dict_psi_angels['G'].tolist())
-    ax4.set_aspect('equal', 'box')
+    axs[1, 0].set_title(part2_utils.typesData().types_data['G'].name)
+    axs[1, 0].set_xlim([-180, 180])
+    axs[1, 0].set_ylim([-180, 180])
+    axs[1, 0].set_ylabel(u'\u03A8')
+    axs[1, 0].set_xlabel(u'\u03A6')
+    axs[1, 0].scatter(dict_phi_angels['G'].tolist(), dict_psi_angels['G'].tolist())
+    axs[1, 0].set_aspect('equal', 'box')
 
     plt.show()
+
 
 def get_type_mask():
     return None
