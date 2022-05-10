@@ -1,12 +1,8 @@
 import os
 
-import numpy
-import torch
 from matplotlib import pyplot as plt
 
 import part2_utils
-import functions
-import tensorflow as tf
 import torch
 
 

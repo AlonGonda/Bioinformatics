@@ -1,4 +1,4 @@
-from functions import part1
+from functions import part_1
 import my_part2
 
 

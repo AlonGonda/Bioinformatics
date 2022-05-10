@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def part1():
+def part_1():
     ramachandran(os.getcwd() + "\\refinementSampleData", 11)
     calculateDistanceAndContactMatrix(
         os.getcwd() + "\\refinementSampleData", 11)  # Calculated Matrix Distances for a certain protein
