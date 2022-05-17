@@ -7,7 +7,7 @@ import torch
 
 
 def get_amino_acid_indexes(sequences):
-    masks = torch.load(os.getcwd() + "\\refinementSampleData\\nativemask.pt")
+    masks = torch.load(".\\refinementSampleData\\nativemask.pt")
     dict_amino_acids_global = {'A': [], 'W': [], 'G': [], 'P': []}
     j = 0
     for protein in sequences:
@@ -58,10 +58,10 @@ def get_amino_acid_indexes(sequences):
 
 
 def calculate_ramachandran_maps():
-    n_coordinates = torch.load(os.getcwd() + "\\refinementSampleData\\CoordNNative.pt")
-    ca_coordinates = torch.load(os.getcwd() + "\\refinementSampleData\\CoordCaNative.pt")
-    c_coordinates = torch.load(os.getcwd() + "\\refinementSampleData\\CoordCNative.pt")
-    sequences = torch.load(os.getcwd() + "\\refinementSampleData\\sequences.pt")
+    n_coordinates = torch.load(".\\refinementSampleData\\CoordNNative.pt")
+    ca_coordinates = torch.load(".\\refinementSampleData\\CoordCaNative.pt")
+    c_coordinates = torch.load(".\\refinementSampleData\\CoordCNative.pt")
+    sequences = torch.load(".\\refinementSampleData\\sequences.pt")
 
     dict_amino_acids_global = get_amino_acid_indexes(sequences)
     dict_phi_angels = {'A': torch.tensor([], dtype=torch.float32), 'W': torch.tensor([], dtype=torch.float32),
