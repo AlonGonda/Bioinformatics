@@ -44,7 +44,7 @@ def main(path):
     # Task 1
     torsion_mask = get_torsion_mask(mask0)
     gly_torsion_mask = get_type_mask(torsion_mask, sequence0, 'G')
-    f = open('part2.out.txt', 'w')
+    f = open('part2out.txt', 'w')
     f.write(str(mask0)+"\n"+str(torsion_mask)+"\n"+str(gly_torsion_mask))
     f.close()
 
@@ -60,5 +60,6 @@ def main(path):
 
 
 if __name__ == '__main__':
-    main('C:/Users/keasar/Documents/Work/teaching/mini_project/code/data/sampleData')
+    #main('C:\\Users\\user\\Desktop\\third year\\Bioinformatics\\refinementSampleData')
     # Replace with the relevant path.
+    calculate_ramachandran_maps()
