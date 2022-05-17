@@ -9,7 +9,8 @@ import torch
 def get_amino_acid_indexes(sequences):
     masks = torch.load(".\\refinementSampleData\\nativemask.pt")
     dict_amino_acids_global = {}
-    for amino_acid_name in part2_utils.typesData().types_data:
+    types_data = part2_utils.typesData().types_data
+    for amino_acid_name in types_data:
         dict_amino_acids_global[amino_acid_name] = []
     j = 0
     for protein in sequences:
@@ -17,7 +18,7 @@ def get_amino_acid_indexes(sequences):
         torsion_mask = get_torsion_mask(mask)
         dict_torsion_mask = {}
         dict_amino_acids_current = {}
-        for amino_acid_name in part2_utils.typesData().types_data:
+        for amino_acid_name in types_data:
             dict_torsion_mask[amino_acid_name] = get_type_mask(torsion_mask, protein, amino_acid_name)
             dict_amino_acids_current[amino_acid_name] = []
             index = 0
@@ -42,10 +43,11 @@ def calculate_ramachandran_maps():
     sequences = torch.load(".\\refinementSampleData\\sequences.pt")
 
     dict_amino_acids_global = get_amino_acid_indexes(sequences)
+    types_data = part2_utils.typesData().types_data
 
     dict_phi_angels = {}
     dict_psi_angels = {}
-    for amino_acid_name in part2_utils.typesData().types_data:
+    for amino_acid_name in types_data:
         dict_phi_angels[amino_acid_name] = torch.tensor([], dtype=torch.float32)
         dict_psi_angels[amino_acid_name] = torch.tensor([], dtype=torch.float32)
 
@@ -55,7 +57,7 @@ def calculate_ramachandran_maps():
         c_coordinates_dict = {}
         phi = {}
         psi = {}
-        for amino_acid_name in part2_utils.typesData().types_data:
+        for amino_acid_name in types_data:
             n_coordinates_dict[amino_acid_name] = torch.index_select(n_coordinates[index], 0,
                                                                      dict_amino_acids_global['A'][index].to(
                                                                          torch.int64))
@@ -74,10 +76,10 @@ def calculate_ramachandran_maps():
             dict_phi_angels[amino_acid_name] = torch.cat((dict_phi_angels[amino_acid_name], phi[amino_acid_name]), 1)
             dict_psi_angels[amino_acid_name] = torch.cat((dict_psi_angels[amino_acid_name], psi[amino_acid_name]), 1)
 
-    fig, axs = plt.subplots(1, len(part2_utils.typesData().types_data))
+    fig, axs = plt.subplots(1, len(types_data))
     index = 0
-    for amino_acid_name in part2_utils.typesData().types_data:
-        axs[index].set_title(part2_utils.typesData().types_data[amino_acid_name].name)
+    for amino_acid_name in types_data:
+        axs[index].set_title(types_data[amino_acid_name].name)
         axs[index].set_xlim([-180, 180])
         axs[index].set_ylim([-180, 180])
         axs[index].set_ylabel(u'\u03A8')
