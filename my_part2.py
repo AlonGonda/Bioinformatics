@@ -1,13 +1,8 @@
-import os
-
-from matplotlib import pyplot as plt
-
 import part2_utils
 import torch
 
 
 def get_amino_acid_indexes(sequences, masks, types_data):
-
     dict_amino_acids_global = {x: [] for x in types_data}
     for j, protein in enumerate(sequences):
         mask = masks[j] == 1
@@ -28,7 +23,6 @@ def get_amino_acid_indexes(sequences, masks, types_data):
 
 
 def calculate_ramachandran_maps(amino_data, sequences, masks, n_coordinates, ca_coordinates, c_coordinates):
-
     types_data = amino_data.types_data
     dict_amino_acids_global = get_amino_acid_indexes(sequences, masks, types_data)
 
@@ -49,7 +43,8 @@ def calculate_ramachandran_maps(amino_data, sequences, masks, n_coordinates, ca_
                                                                      dict_amino_acids_global[amino_acid_name][index].to(
                                                                          torch.int64))
             ca_coordinates_dict[amino_acid_name] = torch.index_select(ca_coordinates[index], 0,
-                                                                      dict_amino_acids_global[amino_acid_name][index].to(
+                                                                      dict_amino_acids_global[amino_acid_name][
+                                                                          index].to(
                                                                           torch.int64))
             c_coordinates_dict[amino_acid_name] = torch.index_select(c_coordinates[index], 0,
                                                                      dict_amino_acids_global[amino_acid_name][index].to(
@@ -63,19 +58,7 @@ def calculate_ramachandran_maps(amino_data, sequences, masks, n_coordinates, ca_
             dict_phi_angels[amino_acid_name] = torch.cat((dict_phi_angels[amino_acid_name], phi[amino_acid_name]), 1)
             dict_psi_angels[amino_acid_name] = torch.cat((dict_psi_angels[amino_acid_name], psi[amino_acid_name]), 1)
 
-    fig, axs = plt.subplots(1, len(types_data))
-    index = 0
-    for amino_acid_name in types_data:
-        axs[index].set_title(types_data[amino_acid_name].name)
-        axs[index].set_xlim([-180, 180])
-        axs[index].set_ylim([-180, 180])
-        axs[index].set_ylabel(u'\u03A8')
-        axs[index].set_xlabel(u'\u03A6')
-        axs[index].scatter(dict_phi_angels[amino_acid_name].tolist(), dict_psi_angels[amino_acid_name].tolist())
-        axs[index].set_aspect('equal', 'box')
-        index += 1
-
-    plt.show()
+    return dict_phi_angels, dict_psi_angels
 
 
 def get_type_mask(mask, seq, type):

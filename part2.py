@@ -30,7 +30,7 @@ def plot(types_data, aa_type, index):
 
 
 def main():
-    types_data = typesData()
+    amino_acid_data = typesData()
 
     n_coordinates = torch.load(".\\refinementSampleData\\CoordNNative.pt")
     ca_coordinates = torch.load(".\\refinementSampleData\\CoordCaNative.pt")
@@ -48,13 +48,22 @@ def main():
     f.close()
 
     # Task 2
-    calculate_ramachandran_maps(types_data, sequences, masks, n_coordinates, ca_coordinates, c_coordinates)
-    # plot(types_data, 'A', 1)
-    # plot(types_data, 'W', 2)
-    # plot(types_data, 'G', 3)
-    # plot(types_data, 'P', 4)
-    # plt.tight_layout()
-    # plt.show()
+    dict_phi_angels, dict_psi_angels = calculate_ramachandran_maps(amino_acid_data, sequences, masks, n_coordinates, ca_coordinates, c_coordinates)
+
+    fig, axs = plt.subplots(1, 4)
+    index = 0
+    for amino_acid_name in amino_acid_data.types_data:
+        if amino_acid_name == 'G' or amino_acid_name == 'W' or amino_acid_name == 'P' or amino_acid_name == 'A':
+            axs[index].set_title(amino_acid_data.types_data[amino_acid_name].name)
+            axs[index].set_xlim([-180, 180])
+            axs[index].set_ylim([-180, 180])
+            axs[index].set_ylabel(u'\u03A8')
+            axs[index].set_xlabel(u'\u03A6')
+            axs[index].scatter(dict_phi_angels[amino_acid_name].tolist(), dict_psi_angels[amino_acid_name].tolist())
+            axs[index].set_aspect('equal', 'box')
+            index += 1
+
+    plt.show()
 
 
 if __name__ == '__main__':
