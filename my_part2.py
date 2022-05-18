@@ -84,7 +84,7 @@ def calculate_ramachandran_maps():
         axs[index].set_ylim([-180, 180])
         axs[index].set_ylabel(u'\u03A8')
         axs[index].set_xlabel(u'\u03A6')
-        axs[index].scatter(dict_phi_angels['A'].tolist(), dict_psi_angels['A'].tolist())
+        axs[index].scatter(dict_phi_angels[amino_acid_name].tolist(), dict_psi_angels[amino_acid_name].tolist())
         axs[index].set_aspect('equal', 'box')
         index += 1
 
