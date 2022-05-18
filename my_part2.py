@@ -59,13 +59,13 @@ def calculate_ramachandran_maps():
         psi = {}
         for amino_acid_name in types_data:
             n_coordinates_dict[amino_acid_name] = torch.index_select(n_coordinates[index], 0,
-                                                                     dict_amino_acids_global['A'][index].to(
+                                                                     dict_amino_acids_global[amino_acid_name][index].to(
                                                                          torch.int64))
             ca_coordinates_dict[amino_acid_name] = torch.index_select(ca_coordinates[index], 0,
-                                                                      dict_amino_acids_global['A'][index].to(
+                                                                      dict_amino_acids_global[amino_acid_name][index].to(
                                                                           torch.int64))
             c_coordinates_dict[amino_acid_name] = torch.index_select(c_coordinates[index], 0,
-                                                                     dict_amino_acids_global['A'][index].to(
+                                                                     dict_amino_acids_global[amino_acid_name][index].to(
                                                                          torch.int64))
 
             phi[amino_acid_name], psi[amino_acid_name] = part2_utils.get_ramachandran(
