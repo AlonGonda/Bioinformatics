@@ -25,8 +25,6 @@ def torsionAngle(V1, V2, V3, V4):
 
 
 def get_ramachandran(n_coordinates, ca_coordinates, c_coordinates):
-    mask_i = n_coordinates[:, 0] < 9999
-    mask_i = mask_i[1:-1]
     c0_phi = c_coordinates[0:-2, :]
     n_phi = n_coordinates[1:-1, :]
     ca_phi = ca_coordinates[1:-1, :]
