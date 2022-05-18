@@ -6,8 +6,8 @@ import part2_utils
 import torch
 
 
-def get_amino_acid_indexes(sequences):
-    masks = torch.load(".\\refinementSampleData\\nativemask.pt")
+def get_amino_acid_indexes(sequences, masks):
+
     dict_amino_acids_global = {}
     types_data = part2_utils.typesData().types_data
     for amino_acid_name in types_data:
@@ -36,14 +36,10 @@ def get_amino_acid_indexes(sequences):
     return dict_amino_acids_global
 
 
-def calculate_ramachandran_maps():
-    n_coordinates = torch.load(".\\refinementSampleData\\CoordNNative.pt")
-    ca_coordinates = torch.load(".\\refinementSampleData\\CoordCaNative.pt")
-    c_coordinates = torch.load(".\\refinementSampleData\\CoordCNative.pt")
-    sequences = torch.load(".\\refinementSampleData\\sequences.pt")
+def calculate_ramachandran_maps(amino_data, sequences, masks, n_coordinates, ca_coordinates, c_coordinates):
 
-    dict_amino_acids_global = get_amino_acid_indexes(sequences)
-    types_data = part2_utils.typesData().types_data
+    dict_amino_acids_global = get_amino_acid_indexes(sequences, masks)
+    types_data = amino_data.types_data
 
     dict_phi_angels = {}
     dict_psi_angels = {}

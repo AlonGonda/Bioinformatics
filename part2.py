@@ -29,15 +29,14 @@ def plot(types_data, aa_type, index):
     plt.yticks([-180, -90, 0, 90, 180])
 
 
-
-def main(path):
+def main():
     types_data = typesData()
 
-    n_coordinates = torch.load(path + "/CoordNNative.pt")
-    ca_coordinates = torch.load(path + "/CoordCaNative.pt")
-    c_coordinates = torch.load(path + "/CoordCNative.pt")
-    sequences = torch.load(path + "/sequences.pt")
-    masks = torch.load(path + "/nativemask.pt")
+    n_coordinates = torch.load(".\\refinementSampleData\\CoordNNative.pt")
+    ca_coordinates = torch.load(".\\refinementSampleData\\CoordCaNative.pt")
+    c_coordinates = torch.load(".\\refinementSampleData\\CoordCNative.pt")
+    sequences = torch.load(".\\refinementSampleData\\sequences.pt")
+    masks = torch.load(".\\refinementSampleData\\nativemask.pt")
 
     sequence0 = sequences[0]
     mask0 = masks[0] == 1
@@ -45,21 +44,19 @@ def main(path):
     torsion_mask = get_torsion_mask(mask0)
     gly_torsion_mask = get_type_mask(torsion_mask, sequence0, 'G')
     f = open('part2out.txt', 'w')
-    f.write(str(mask0)+"\n"+str(torsion_mask)+"\n"+str(gly_torsion_mask))
+    f.write(str(mask0) + "\n" + str(torsion_mask) + "\n" + str(gly_torsion_mask))
     f.close()
 
     # Task 2
-    types_data = typesData()
     calculate_ramachandran_maps(types_data, sequences, masks, n_coordinates, ca_coordinates, c_coordinates)
-    plot(types_data, 'A', 1)
-    plot(types_data, 'W', 2)
-    plot(types_data, 'G', 3)
-    plot(types_data, 'P', 4)
-    plt.tight_layout()
-    plt.show()
+    # plot(types_data, 'A', 1)
+    # plot(types_data, 'W', 2)
+    # plot(types_data, 'G', 3)
+    # plot(types_data, 'P', 4)
+    # plt.tight_layout()
+    # plt.show()
 
 
 if __name__ == '__main__':
-    #main('C:\\Users\\user\\Desktop\\third year\\Bioinformatics\\refinementSampleData')
+    main()
     # Replace with the relevant path.
-    calculate_ramachandran_maps()
