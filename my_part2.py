@@ -6,28 +6,19 @@ import part2_utils
 import torch
 
 
-def get_amino_acid_indexes(sequences, masks):
+def get_amino_acid_indexes(sequences, masks, types_data):
 
-    dict_amino_acids_global = {}
-    types_data = part2_utils.typesData().types_data
-    for amino_acid_name in types_data:
-        dict_amino_acids_global[amino_acid_name] = []
-    j = 0
-    for protein in sequences:
+    dict_amino_acids_global = {x: [] for x in types_data}
+    for j, protein in enumerate(sequences):
         mask = masks[j] == 1
         torsion_mask = get_torsion_mask(mask)
-        dict_torsion_mask = {}
-        dict_amino_acids_current = {}
+        dict_torsion_mask = {x: get_type_mask(torsion_mask, protein, x) for x in types_data}
+        dict_amino_acids_current = {x: [] for x in types_data}
         for amino_acid_name in types_data:
-            dict_torsion_mask[amino_acid_name] = get_type_mask(torsion_mask, protein, amino_acid_name)
-            dict_amino_acids_current[amino_acid_name] = []
-            index = 0
-            for amino_acid in dict_torsion_mask[amino_acid_name]:
+            for index, amino_acid in enumerate(dict_torsion_mask[amino_acid_name]):
                 if amino_acid:
                     dict_amino_acids_current[amino_acid_name].append(index)
-                index += 1
             dict_amino_acids_global[amino_acid_name].append(dict_amino_acids_current[amino_acid_name])
-        j += 1
 
     for i in range(0, len(sequences)):
         for key in dict_amino_acids_global.keys():
@@ -38,8 +29,8 @@ def get_amino_acid_indexes(sequences, masks):
 
 def calculate_ramachandran_maps(amino_data, sequences, masks, n_coordinates, ca_coordinates, c_coordinates):
 
-    dict_amino_acids_global = get_amino_acid_indexes(sequences, masks)
     types_data = amino_data.types_data
+    dict_amino_acids_global = get_amino_acid_indexes(sequences, masks, types_data)
 
     dict_phi_angels = {}
     dict_psi_angels = {}
