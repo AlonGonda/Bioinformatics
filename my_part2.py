@@ -26,34 +26,18 @@ def calculate_ramachandran_maps(amino_data, sequences, masks, n_coordinates, ca_
     types_data = amino_data.types_data
     dict_amino_acids_global = get_amino_acid_indexes(sequences, masks, types_data)
 
-    dict_phi_angels = {}
-    dict_psi_angels = {}
-    for amino_acid_name in types_data:
-        dict_phi_angels[amino_acid_name] = torch.tensor([], dtype=torch.float32)
-        dict_psi_angels[amino_acid_name] = torch.tensor([], dtype=torch.float32)
+    dict_phi_angels = {x: torch.tensor([], dtype=torch.float32) for x in types_data}
+    dict_psi_angels = {x: torch.tensor([], dtype=torch.float32) for x in types_data}
 
     for index in range(0, len(sequences)):
-        n_coordinates_dict = {}
-        ca_coordinates_dict = {}
-        c_coordinates_dict = {}
+        n_coordinates_dict = {x: torch.index_select(n_coordinates[index], 0, dict_amino_acids_global[x][index].to(torch.int64)) for x in types_data}
+        ca_coordinates_dict = {x: torch.index_select(ca_coordinates[index], 0, dict_amino_acids_global[x][index].to(torch.int64)) for x in types_data}
+        c_coordinates_dict = {x: torch.index_select(c_coordinates[index], 0, dict_amino_acids_global[x][index].to(torch.int64)) for x in types_data}
         phi = {}
         psi = {}
-        for amino_acid_name in types_data:
-            n_coordinates_dict[amino_acid_name] = torch.index_select(n_coordinates[index], 0,
-                                                                     dict_amino_acids_global[amino_acid_name][index].to(
-                                                                         torch.int64))
-            ca_coordinates_dict[amino_acid_name] = torch.index_select(ca_coordinates[index], 0,
-                                                                      dict_amino_acids_global[amino_acid_name][
-                                                                          index].to(
-                                                                          torch.int64))
-            c_coordinates_dict[amino_acid_name] = torch.index_select(c_coordinates[index], 0,
-                                                                     dict_amino_acids_global[amino_acid_name][index].to(
-                                                                         torch.int64))
 
-            phi[amino_acid_name], psi[amino_acid_name] = part2_utils.get_ramachandran(
-                n_coordinates_dict[amino_acid_name][:],
-                ca_coordinates_dict[amino_acid_name][:],
-                c_coordinates_dict[amino_acid_name][:])
+        for amino_acid_name in types_data:
+            phi[amino_acid_name], psi[amino_acid_name] = part2_utils.get_ramachandran(n_coordinates_dict[amino_acid_name][:], ca_coordinates_dict[amino_acid_name][:], c_coordinates_dict[amino_acid_name][:])
 
             dict_phi_angels[amino_acid_name] = torch.cat((dict_phi_angels[amino_acid_name], phi[amino_acid_name]), 1)
             dict_psi_angels[amino_acid_name] = torch.cat((dict_psi_angels[amino_acid_name], psi[amino_acid_name]), 1)
