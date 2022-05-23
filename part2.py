@@ -12,7 +12,6 @@ from my_part2 import get_type_mask
 # Calculate phi/psi torsion angles and stores them in type specific data structures
 from my_part2 import calculate_ramachandran_maps
 
-import matplotlib.image as mpimg
 
 def plot(types_data, aa_type, index):
     ax = plt.subplot(2, 2, index)

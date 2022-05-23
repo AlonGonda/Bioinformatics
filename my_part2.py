@@ -33,10 +33,15 @@ def calculate_ramachandran_maps(amino_data, sequences, masks, n_coordinates, ca_
         n_coordinates_current = n_coordinates[index]
         ca_coordinates_current = ca_coordinates[index]
         c_coordinates_current = c_coordinates[index]
-        phi, psi = part2_utils.get_ramachandran(n_coordinates_current[:] / 100, ca_coordinates_current[:] / 100, c_coordinates_current[:] / 100)
+        phi, psi = part2_utils.get_ramachandran(n_coordinates_current[:] / 100, ca_coordinates_current[:] / 100,
+                                                c_coordinates_current[:] / 100)
         for amino_acid_name in types_data:
             phi_current = torch.index_select(phi[0], 0, dict_amino_acids_global[amino_acid_name][index].to(torch.int64))
             psi_current = torch.index_select(psi[0], 0, dict_amino_acids_global[amino_acid_name][index].to(torch.int64))
+            for angle1,angle2 in zip(phi_current,psi_current):
+                if angle1==0 and angle2==0:
+                    phi_current=phi_current[phi_current!=angle1]
+                    psi_current=psi_current[psi_current!=angle2]
             dict_phi_angels[amino_acid_name] = torch.cat((dict_phi_angels[amino_acid_name], phi_current), 0)
             dict_psi_angels[amino_acid_name] = torch.cat((dict_psi_angels[amino_acid_name], psi_current), 0)
 
